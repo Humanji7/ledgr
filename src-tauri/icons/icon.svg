@@ -1,0 +1,17 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="160" y1="120" x2="864" y2="904" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#1F2937"/>
+    </linearGradient>
+  </defs>
+  <rect x="96" y="96" width="832" height="832" rx="180" fill="url(#g)"/>
+  <rect x="248" y="232" width="528" height="560" rx="56" fill="#FFFFFF" fill-opacity="0.10" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="8"/>
+  <rect x="296" y="300" width="432" height="52" rx="26" fill="#FFFFFF" fill-opacity="0.92"/>
+  <rect x="296" y="392" width="360" height="40" rx="20" fill="#FFFFFF" fill-opacity="0.70"/>
+  <rect x="296" y="464" width="404" height="40" rx="20" fill="#FFFFFF" fill-opacity="0.62"/>
+  <rect x="296" y="536" width="332" height="40" rx="20" fill="#FFFFFF" fill-opacity="0.62"/>
+  <rect x="296" y="652" width="250" height="48" rx="24" fill="#10B981"/>
+  <path d="M332 676h20v-14h16v14h20v-42h-20v12h-16v-12h-20v42zm88 0h20v-24h22v-18h-42v42zm72 0h52v-18h-32v-24h-20v42zm84 0h20v-42h-20v42zm52 0h52v-18h-32v-24h-20v42z" fill="#0B1220" fill-opacity="0.85"/>
+</svg>
+

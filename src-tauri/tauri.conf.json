@@ -1,0 +1,38 @@
+{
+  "$schema": "./gen/schemas/desktop-schema.json",
+  "productName": "Ledgr",
+  "identifier": "com.ledgr.ledgr",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "beforeBuildCommand": "pnpm build",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Ledgr",
+        "width": 1200,
+        "height": 800,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": ["icons/icon.icns", "icons/icon.ico", "icons/icon.png"],
+    "externalBin": [
+      "binaries/llama-cli",
+      "binaries/libmtmd.0.dylib",
+      "binaries/libllama.0.dylib",
+      "binaries/libggml.0.dylib",
+      "binaries/libggml-cpu.0.dylib",
+      "binaries/libggml-blas.0.dylib",
+      "binaries/libggml-metal.0.dylib",
+      "binaries/libggml-rpc.0.dylib",
+      "binaries/libggml-base.0.dylib"
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+[package]
+name = "ledgr"
+version = "0.1.0"
+description = "Ledgr — Offline AI Finance Tracker"
+authors = ["Ledgr Contributors"]
+license = "MIT"
+repository = "https://github.com/humanji7/ledgr"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["test"] }
+tauri-plugin-shell = "2"
+tauri-plugin-dialog = "2"
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+chrono = { version = "0.4", features = ["serde"] }
+csv = "1.3"
+hex = "0.4"
+rusqlite = { version = "0.31", features = ["bundled"] }
+sha2 = "0.10"
+uuid = { version = "1", features = ["v4"] }
+
+[dev-dependencies]
+tempfile = "3"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

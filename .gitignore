@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+src-tauri/target/
+
+# Database
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+Thumbs.db
+
+# Test coverage
+coverage/
+
+# Tauri dev artifacts
+src-tauri/gen/schemas/
+
+# Sidecar binaries (llama.cpp) — too large for git
+src-tauri/binaries/
+src-tauri/resources/llama/
