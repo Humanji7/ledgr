@@ -6,7 +6,7 @@
   "author": "Ledgr Contributors",
   "repository": {
     "type": "git",
-    "url": "https://github.com/humanji7/ledgr.git"
+    "url": "https://github.com/Humanji7/ledgr.git"
   },
   "packageManager": "pnpm@9.0.0",
   "scripts": {

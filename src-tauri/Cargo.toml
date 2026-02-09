@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Ledgr — Offline AI Finance Tracker"
 authors = ["Ledgr Contributors"]
 license = "MIT"
-repository = "https://github.com/humanji7/ledgr"
+repository = "https://github.com/Humanji7/ledgr"
 edition = "2021"
 
 [build-dependencies]

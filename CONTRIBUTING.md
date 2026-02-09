@@ -12,7 +12,7 @@ Thank you for your interest in contributing!
 ## Setup
 
 ```bash
-git clone https://github.com/humanji7/ledgr.git
+git clone https://github.com/Humanji7/ledgr.git
 cd ledgr
 pnpm install
 ```
@@ -26,8 +26,8 @@ pnpm tauri:dev
 # Run frontend tests
 pnpm test
 
-# Run Rust tests
-cd src-tauri && cargo test
+# Run Rust tests (requires frontend build first)
+pnpm build && cd src-tauri && cargo test
 
 # Build DMG
 pnpm tauri:build
@@ -37,7 +37,7 @@ pnpm tauri:build
 
 1. Fork the repo and create a branch from `main`
 2. Make your changes
-3. Run `pnpm test` and `cargo test` — all tests must pass
+3. Run `pnpm test` and `pnpm build && cd src-tauri && cargo test` — all tests must pass
 4. Open a PR against `main`
 5. Describe **what** changed and **why**
 
@@ -49,7 +49,7 @@ pnpm tauri:build
 
 ## Reporting Bugs
 
-Use the [bug report template](https://github.com/humanji7/ledgr/issues/new?template=bug_report.md).
+Use the [bug report template](https://github.com/Humanji7/ledgr/issues/new?template=bug_report.md).
 
 ## License
 

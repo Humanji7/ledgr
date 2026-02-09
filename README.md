@@ -30,11 +30,28 @@ Offline desktop finance tracker for macOS with local AI categorization.
 ### Build & Run
 
 ```bash
-git clone https://github.com/humanji7/ledgr.git
+git clone https://github.com/Humanji7/ledgr.git
 cd ledgr
 pnpm install
+```
+
+AI categorization requires [llama.cpp](https://github.com/ggml-org/llama.cpp) sidecar binaries.
+Download or build them and place into:
+
+```
+src-tauri/binaries/llama-cli-aarch64-apple-darwin
+src-tauri/binaries/lib*.dylib
+src-tauri/resources/llama/lib*.dylib
+```
+
+Then run:
+
+```bash
 pnpm tauri:dev
 ```
+
+Ledgr works without the model — CSV import, budgets, and rules function fully offline.
+The AI binary is only needed for automatic transaction categorization.
 
 ### Build DMG
 
@@ -46,8 +63,8 @@ pnpm tauri:build
 ### Run Tests
 
 ```bash
-pnpm test              # frontend (Vitest)
-cd src-tauri && cargo test  # backend (Rust)
+pnpm test                            # frontend (Vitest)
+pnpm build && cd src-tauri && cargo test  # backend (Rust, needs frontend build first)
 ```
 
 ## Privacy
