@@ -17,22 +17,21 @@ pub fn categorize_by_rules<R: tauri::Runtime>(
             return Some(CategoryDecision {
                 category: cat,
                 source: "learned_rule".to_string(),
-                reason: format!("LEARNED:{}", pattern),
+                reason: format!("LEARNED:{pattern}"),
             });
         }
     }
 
     let d = pattern;
 
-    if amount > 0.0 {
-        if d.contains("PAYROLL") || d.contains("DIRECT DEP") || d.contains("SALARY") {
+    if amount > 0.0
+        && (d.contains("PAYROLL") || d.contains("DIRECT DEP") || d.contains("SALARY")) {
             return Some(CategoryDecision {
                 category: "income".to_string(),
                 source: "rule".to_string(),
                 reason: "RULE:INCOME".to_string(),
             });
         }
-    }
 
     if d.contains("VENMO") || d.contains("ZELLE") || d.contains("TRANSFER") || d.contains("PAYMENT TO") {
         return Some(CategoryDecision {

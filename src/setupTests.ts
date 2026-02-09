@@ -7,10 +7,8 @@ class ResizeObserverStub {
   disconnect() {}
 }
 
-// @ts-expect-error - test env polyfill
-globalThis.ResizeObserver = ResizeObserverStub;
+globalThis.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver;
 
-// @ts-expect-error - test env polyfill
 globalThis.matchMedia =
   globalThis.matchMedia ??
   ((query: string) => ({
@@ -23,6 +21,5 @@ globalThis.matchMedia =
     removeEventListener() {},
     dispatchEvent() {
       return false;
-    }
-  }));
-
+    },
+  })) as unknown as typeof matchMedia;

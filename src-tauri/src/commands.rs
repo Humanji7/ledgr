@@ -40,13 +40,13 @@ pub async fn set_language(app: tauri::AppHandle, language: String) -> Result<(),
 }
 
 pub fn get_auto_learn_rules_impl<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<bool, String> {
-    let raw = crate::db::get_setting(&app, "auto_learn_rules")?.unwrap_or_else(|| "true".to_string());
+    let raw = crate::db::get_setting(app, "auto_learn_rules")?.unwrap_or_else(|| "true".to_string());
     let v = raw.trim().to_lowercase();
     Ok(v != "false" && v != "0" && v != "no")
 }
 
 pub fn set_auto_learn_rules_impl<R: Runtime>(app: &tauri::AppHandle<R>, enabled: bool) -> Result<(), String> {
-    crate::db::set_setting(&app, "auto_learn_rules", if enabled { "true" } else { "false" })?;
+    crate::db::set_setting(app, "auto_learn_rules", if enabled { "true" } else { "false" })?;
     Ok(())
 }
 
@@ -409,9 +409,8 @@ pub async fn export_csv_impl<R: Runtime>(
         let escaped_desc = t.description.replace('"', "\"\"");
         writeln!(
             file,
-            "{},{},{:.2},{}",
+            "{},\"{escaped_desc}\",{:.2},{}",
             t.date,
-            format!("\"{}\"", escaped_desc),
             t.amount,
             t.category
         )

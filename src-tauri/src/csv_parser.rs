@@ -74,7 +74,7 @@ pub fn parse_chase_csv(path: &str) -> Result<Vec<ParsedTransaction>, String> {
             continue;
         }
 
-        let hash_input = format!("{date}{desc}{}", amount.to_string());
+        let hash_input = format!("{date}{desc}{amount}");
         let hash = sha256_hex(&hash_input);
 
         out.push(ParsedTransaction {
