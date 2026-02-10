@@ -22,7 +22,7 @@ Offline desktop finance tracker for macOS with local AI categorization.
 
 ### Prerequisites
 
-- macOS (Apple Silicon)
+- macOS (Apple Silicon or Intel)
 - [Rust](https://rustup.rs/) (stable)
 - [Node.js](https://nodejs.org/) LTS
 - [pnpm](https://pnpm.io/) 9+
@@ -53,12 +53,21 @@ pnpm tauri:dev
 Ledgr works without the model — CSV import, budgets, and rules function fully offline.
 The AI binary is only needed for automatic transaction categorization.
 
-### Build DMG
+### Build DMG (Apple Silicon)
 
 ```bash
 pnpm tauri:build
 # Output: src-tauri/target/release/bundle/dmg/Ledgr_*.dmg
 ```
+
+### Build DMG (Intel Mac)
+
+```bash
+bash scripts/build_intel.sh
+# Output: src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/Ledgr_*.dmg
+```
+
+The Intel build uses stub binaries for llama.cpp — CSV import, budgets, and rules work fully, but AI categorization is not available on Intel Macs.
 
 ### Run Tests
 
@@ -82,7 +91,8 @@ lsof -i -P | grep -i ledgr
 ## Limitations
 
 - **Chase CSV only** — other bank formats are not yet supported
-- **macOS ARM only** — no Windows/Linux builds
+- **macOS only** — no Windows/Linux builds
+- **AI requires Apple Silicon** — Intel Macs can use all features except AI categorization
 - **Not code-signed** — macOS Gatekeeper will warn on first launch; right-click → Open to bypass
 - **Model not included** — download a GGUF model separately (e.g. Qwen2.5 1.5B Instruct)
 
