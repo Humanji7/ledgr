@@ -199,12 +199,16 @@ export default function App() {
   );
 
   const onImportClick = React.useCallback(async () => {
-    const selected = await open({
-      multiple: false,
-      filters: [{ name: "CSV", extensions: ["csv"] }]
-    });
-    if (!selected || Array.isArray(selected)) return;
-    await doImport(selected);
+    try {
+      const selected = await open({
+        multiple: false,
+        filters: [{ name: "CSV", extensions: ["csv"] }]
+      });
+      if (!selected || Array.isArray(selected)) return;
+      await doImport(selected);
+    } catch (e) {
+      setToast(e instanceof Error ? e.message : String(e));
+    }
   }, [doImport]);
 
   const onChangeCategory = React.useCallback(
