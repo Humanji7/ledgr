@@ -165,7 +165,29 @@ export const strings: Record<Language, Record<string, string>> = {
     autoLearnRulesHint: "When you change a category, Ledgr saves a learned rule for this exact description.",
     modelOptionalHint: "Model is optional. Add it to categorize unknown merchants with LLM.",
     enabled: "Enabled",
-    disabledLabel: "Disabled"
+    disabledLabel: "Disabled",
+    wizardWelcomeTitle: "AI Categorization Setup",
+    wizardWelcomeBody:
+      "Ledgr can automatically categorize your transactions using AI. For this, you need a small model file (~1 GB) that runs entirely on your computer. Your data never leaves your device.",
+    wizardDownloadTitle: "Download the Model",
+    wizardDownloadBody:
+      "Click the button below to open the download page. The file is about 1 GB — download may take a few minutes.",
+    wizardDownloadHint: "After downloading, come back here and click \"Next\".",
+    wizardSelectTitle: "Select the Model File",
+    wizardSelectBody: "Click the button below and choose the .gguf file you just downloaded.",
+    wizardDoneTitle: "All Set!",
+    wizardDoneBody:
+      "The model is configured. Ledgr will now automatically categorize your transactions using AI.",
+    wizardSkippedTitle: "Setup Complete",
+    wizardSkippedBody:
+      "You can use Ledgr without a model — transactions will be categorized by rules only. You can add a model later in Settings.",
+    wizardSkip: "Skip for now",
+    wizardBack: "Back",
+    wizardNext: "Next",
+    wizardStart: "Start using Ledgr",
+    wizardOpenLink: "Open Download Page",
+    wizardDownloaded: "I've downloaded it",
+    wizardSelectFile: "Select .gguf File"
   },
   ru: {
     loading: "Загрузка…",
@@ -260,7 +282,29 @@ export const strings: Record<Language, Record<string, string>> = {
     autoLearnRulesHint: "При изменении категории Ledgr сохранит выученное правило для точного описания транзакции.",
     modelOptionalHint: "Модель не обязательна. Добавьте её, чтобы категоризировать неизвестных мерчантов через LLM.",
     enabled: "Включено",
-    disabledLabel: "Выключено"
+    disabledLabel: "Выключено",
+    wizardWelcomeTitle: "Настройка AI-категоризации",
+    wizardWelcomeBody:
+      "Ledgr может автоматически распознавать ваши траты с помощью AI. Для этого нужен файл модели (~1 ГБ), который будет работать полностью на вашем компьютере. Ваши данные никуда не отправляются.",
+    wizardDownloadTitle: "Скачайте модель",
+    wizardDownloadBody:
+      "Нажмите кнопку ниже, чтобы открыть страницу скачивания. Файл весит около 1 ГБ — скачивание может занять несколько минут.",
+    wizardDownloadHint: "После скачивания вернитесь сюда и нажмите «Далее».",
+    wizardSelectTitle: "Выберите файл модели",
+    wizardSelectBody: "Нажмите кнопку ниже и выберите скачанный файл .gguf.",
+    wizardDoneTitle: "Готово!",
+    wizardDoneBody:
+      "Модель настроена. Теперь Ledgr будет автоматически категоризировать ваши транзакции с помощью AI.",
+    wizardSkippedTitle: "Настройка завершена",
+    wizardSkippedBody:
+      "Вы можете использовать Ledgr без модели — транзакции будут категоризированы только по правилам. Добавить модель можно позже в настройках.",
+    wizardSkip: "Пропустить",
+    wizardBack: "Назад",
+    wizardNext: "Далее",
+    wizardStart: "Начать работу",
+    wizardOpenLink: "Открыть страницу скачивания",
+    wizardDownloaded: "Я скачал",
+    wizardSelectFile: "Выбрать файл .gguf"
   }
 };
 

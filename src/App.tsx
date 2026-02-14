@@ -15,6 +15,7 @@ import { SearchInput } from "@/components/SearchInput";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { StatsCards } from "@/components/StatsCards";
 import { TransactionTable } from "@/components/TransactionTable";
+import { ModelSetupWizard } from "@/components/ModelSetupWizard";
 import {
   checkModelSetup,
   getAutoLearnRules,
@@ -26,6 +27,7 @@ import {
   getStatsFiltered,
   getTransactionsFiltered,
   importCsv,
+  isWizardCompleted,
   resetData,
   setModelPath,
   setLanguage,
@@ -43,6 +45,7 @@ export default function App() {
   const s = strings[lang];
 
   const [modelReady, setModelReady] = React.useState<boolean | null>(null);
+  const [wizardDone, setWizardDone] = React.useState<boolean | null>(null);
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
   const [stats, setStats] = React.useState<Awaited<ReturnType<typeof getStatsFiltered>> | null>(null);
   const [availableMonths, setAvailableMonths] = React.useState<string[]>([]);
@@ -117,19 +120,22 @@ export default function App() {
     let cancelled = false;
     (async () => {
       try {
-        const [ok, savedLang, autoLearn] = await Promise.all([
+        const [ok, savedLang, autoLearn, wizardOk] = await Promise.all([
           checkModelSetup(),
           getLanguage(),
-          getAutoLearnRules()
+          getAutoLearnRules(),
+          isWizardCompleted()
         ]);
         if (cancelled) return;
         if (savedLang === "ru" || savedLang === "en") setLang(savedLang);
         setAutoLearnRulesEnabled(autoLearn);
         setModelReady(ok);
+        setWizardDone(wizardOk);
         await refreshMonths();
       } catch (e) {
         if (cancelled) return;
         setModelReady(false);
+        setWizardDone(false);
         setToast(e instanceof Error ? e.message : String(e));
       }
     })();
@@ -148,6 +154,18 @@ export default function App() {
     try {
       const ok = await checkModelSetup();
       setModelReady(ok);
+      await refreshMonths();
+      await refresh(filter, debouncedSearch);
+    } catch (e) {
+      setToast(e instanceof Error ? e.message : String(e));
+    }
+  }, [debouncedSearch, filter, refresh, refreshMonths]);
+
+  const onWizardComplete = React.useCallback(async () => {
+    try {
+      const ok = await checkModelSetup();
+      setModelReady(ok);
+      setWizardDone(true);
       await refreshMonths();
       await refresh(filter, debouncedSearch);
     } catch (e) {
@@ -313,7 +331,7 @@ export default function App() {
     []
   );
 
-  if (modelReady === null) {
+  if (modelReady === null || wizardDone === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 text-sm text-slate-700">
         {s.loading}
@@ -374,7 +392,11 @@ export default function App() {
         ) : null}
 
         <main id="main">
-          {!modelReady ? (
+          {!wizardDone && !modelReady ? (
+            <div className="mb-6">
+              <ModelSetupWizard onComplete={onWizardComplete} lang={lang} />
+            </div>
+          ) : !modelReady ? (
             <div className="mb-6">
               <Card>
                 <CardHeader>

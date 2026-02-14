@@ -202,3 +202,13 @@ export async function deleteCustomRule(id: string): Promise<void> {
   if (!isTauri()) return;
   return invoke<void>("delete_custom_rule", { id });
 }
+
+export async function isWizardCompleted(): Promise<boolean> {
+  if (!isTauri()) return false;
+  return invoke<boolean>("is_wizard_completed");
+}
+
+export async function setWizardCompleted(): Promise<void> {
+  if (!isTauri()) return;
+  return invoke<void>("set_wizard_completed");
+}

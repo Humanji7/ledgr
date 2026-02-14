@@ -65,6 +65,17 @@ pub async fn reset_data(app: tauri::AppHandle, keep_model_path: Option<bool>) ->
     crate::db::reset_data(&app, keep_model_path.unwrap_or(true))
 }
 
+#[tauri::command]
+pub async fn is_wizard_completed(app: tauri::AppHandle) -> Result<bool, String> {
+    let raw = crate::db::get_setting(&app, "wizard_completed")?.unwrap_or_default();
+    Ok(raw == "true")
+}
+
+#[tauri::command]
+pub async fn set_wizard_completed(app: tauri::AppHandle) -> Result<(), String> {
+    crate::db::set_setting(&app, "wizard_completed", "true")
+}
+
 #[derive(Debug, Clone, Serialize)]
 struct ImportProgressEvent {
     stage: String,

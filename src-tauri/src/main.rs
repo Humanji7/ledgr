@@ -97,6 +97,8 @@ fn main() {
             commands::get_auto_learn_rules,
             commands::set_auto_learn_rules,
             commands::reset_data,
+            commands::is_wizard_completed,
+            commands::set_wizard_completed,
             commands::import_csv,
             commands::get_transactions,
             commands::get_transactions_filtered,
