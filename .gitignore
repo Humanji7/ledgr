@@ -36,6 +36,9 @@ coverage/
 # Tauri dev artifacts
 src-tauri/gen/schemas/
 
+# Test data
+*.csv
+
 # Sidecar binaries (llama.cpp) — too large for git
 src-tauri/binaries/
 src-tauri/resources/llama/
