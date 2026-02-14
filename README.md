@@ -14,9 +14,9 @@ Offline desktop finance tracker for macOS with local AI categorization.
 - **Export** — filtered transactions to CSV
 - **Multi-language** — English and Russian
 
-![Settings](docs/screenshots/settings.png)
+![Transactions](docs/screenshots/transactions.png)
 
-![Budget](docs/screenshots/budget.png)
+![Settings](docs/screenshots/settings.png)
 
 ## Quick Start
 
