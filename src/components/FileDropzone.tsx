@@ -5,7 +5,7 @@ import type { Language } from "@/lib/strings";
 import { strings } from "@/lib/strings";
 
 type Props = {
-  onFileSelected: (path: string) => void;
+  onFileSelected: (file: string | File) => void;
   disabled?: boolean;
   lang: Language;
 };
@@ -52,9 +52,15 @@ export function FileDropzone({ onFileSelected, disabled, lang }: Props) {
   const onDrop = React.useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragActive(false);
-    // Actual file paths are provided by the Tauri window-level file-drop event.
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      setLastFile(file.name);
+      onFileSelected(file);
+      return;
+    }
+    // In Tauri, actual file paths are provided by the window-level file-drop event.
     setLastFile(e.dataTransfer.files?.[0]?.name ?? null);
-  }, []);
+  }, [onFileSelected]);
 
   return (
     <div

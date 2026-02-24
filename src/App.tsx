@@ -18,6 +18,7 @@ import { TransactionTable } from "@/components/TransactionTable";
 import { ModelSetupWizard } from "@/components/ModelSetupWizard";
 import {
   checkModelSetup,
+  exportCsvText,
   getAutoLearnRules,
   setAutoLearnRules,
   exportCsv,
@@ -27,6 +28,8 @@ import {
   getStatsFiltered,
   getTransactionsFiltered,
   importCsv,
+  importCsvBrowserFile,
+  isTauriRuntime,
   isWizardCompleted,
   resetData,
   setModelPath,
@@ -38,8 +41,18 @@ import type { BudgetStatus, Category, ImportProgressEvent, Transaction, Transact
 import type { Language } from "@/lib/strings";
 import { strings, toastExported, toastImported } from "@/lib/strings";
 
+type WebView = "landing" | "demo";
+
+function getWebViewFromHash(): WebView {
+  if (typeof window === "undefined") return "landing";
+  return window.location.hash === "#/demo" ? "demo" : "landing";
+}
+
 export default function App() {
   const searchId = React.useId();
+  const webImportInputRef = React.useRef<HTMLInputElement | null>(null);
+  const isNativeApp = isTauriRuntime();
+  const [webView, setWebView] = React.useState<WebView>(() => (isNativeApp ? "demo" : getWebViewFromHash()));
 
   const [lang, setLang] = React.useState<Language>("en");
   const s = strings[lang];
@@ -70,6 +83,14 @@ export default function App() {
   const debouncedSearch = useDebounce(searchQuery, 300);
   const [busy, setBusy] = React.useState(false);
   const [toast, setToast] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (isNativeApp) return;
+    const sync = () => setWebView(getWebViewFromHash());
+    sync();
+    window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, [isNativeApp]);
 
   const refreshMonths = React.useCallback(async () => {
     const months = await getAvailableMonths();
@@ -189,12 +210,15 @@ export default function App() {
   }, [debouncedSearch, filter, modelReady, refresh]);
 
   const doImport = React.useCallback(
-    async (path: string) => {
+    async (source: string | File) => {
       setBusy(true);
       setToast(null);
       setImportProgress(null);
       try {
-        const result = await importCsv(path);
+        const result =
+          typeof source === "string"
+            ? await importCsv(source)
+            : await importCsvBrowserFile(source);
         setToast(
           toastImported(
             lang,
@@ -218,6 +242,10 @@ export default function App() {
 
   const onImportClick = React.useCallback(async () => {
     try {
+      if (!isNativeApp) {
+        webImportInputRef.current?.click();
+        return;
+      }
       const selected = await open({
         multiple: false,
         filters: [{ name: "CSV", extensions: ["csv"] }]
@@ -227,7 +255,7 @@ export default function App() {
     } catch (e) {
       setToast(e instanceof Error ? e.message : String(e));
     }
-  }, [doImport]);
+  }, [doImport, isNativeApp]);
 
   const onChangeCategory = React.useCallback(
     async (id: string, category: Category) => {
@@ -243,6 +271,23 @@ export default function App() {
 
   const onExportClick = React.useCallback(async () => {
     try {
+      if (!isNativeApp) {
+        const { text, count } = await exportCsvText(
+          filter.startDate ?? undefined,
+          filter.endDate ?? undefined
+        );
+        const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `ledgr-export-${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        setToast(toastExported(lang, count));
+        return;
+      }
       const defaultName = `ledgr-export-${new Date().toISOString().slice(0, 10)}.csv`;
       const path = await save({
         filters: [{ name: "CSV", extensions: ["csv"] }],
@@ -254,14 +299,16 @@ export default function App() {
     } catch (e) {
       setToast(e instanceof Error ? e.message : String(e));
     }
-  }, [filter.endDate, filter.startDate, lang]);
+  }, [filter.endDate, filter.startDate, isNativeApp, lang]);
 
   const onResetData = React.useCallback(async () => {
     try {
-      const ok = await confirm(
-        s.resetDataConfirmText,
-        { title: s.resetDataConfirmTitle, kind: "warning" }
-      );
+      const ok = isNativeApp
+        ? await confirm(
+            s.resetDataConfirmText,
+            { title: s.resetDataConfirmTitle, kind: "warning" }
+          )
+        : window.confirm(s.resetDataConfirmText);
       if (!ok) return;
       setBusy(true);
       await resetData(true);
@@ -293,7 +340,7 @@ export default function App() {
     } finally {
       setBusy(false);
     }
-  }, [refreshMonths, s.resetDataConfirmText, s.resetDataConfirmTitle, s.resetDone]);
+  }, [isNativeApp, refreshMonths, s.resetDataConfirmText, s.resetDataConfirmTitle, s.resetDone]);
 
   const onChangeLanguage = React.useCallback(async (next: Language) => {
     try {
@@ -306,6 +353,10 @@ export default function App() {
 
   const onSelectModel = React.useCallback(async () => {
     try {
+      if (!isNativeApp) {
+        setToast(lang === "ru" ? "Выбор локальной модели доступен в desktop-версии." : "Local model selection is available in the desktop app.");
+        return;
+      }
       const selected = await open({
         multiple: false,
         filters: [{ name: "GGUF model", extensions: ["gguf"] }]
@@ -317,7 +368,7 @@ export default function App() {
     } catch (e) {
       setToast(e instanceof Error ? e.message : String(e));
     }
-  }, [lang, onModelComplete]);
+  }, [isNativeApp, lang, onModelComplete]);
 
   const onChangeAutoLearnRules = React.useCallback(
     async (enabled: boolean) => {
@@ -330,6 +381,128 @@ export default function App() {
     },
     []
   );
+
+  if (!isNativeApp && webView === "landing") {
+    return (
+      <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#e0f2fe_0%,_#f8fafc_38%,_#f8fafc_100%)] text-slate-900">
+        <div className="mx-auto max-w-6xl px-6 py-8">
+          <header className="mb-10 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">Ledgr</div>
+              <h1 className="mt-1 text-2xl font-semibold text-slate-900">
+                Personal finance tracker with local AI categorization
+              </h1>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <a
+                href="#/demo"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
+              >
+                Open Interactive Demo
+              </a>
+              <a
+                href="https://github.com/Humanji7/ledgr/releases"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-slate-900 hover:bg-slate-50"
+              >
+                Desktop Build (Releases)
+              </a>
+            </div>
+          </header>
+
+          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+            <Card className="overflow-hidden border-slate-200/80 shadow-lg shadow-slate-200/60">
+              <CardHeader className="pb-2">
+                <div className="mb-2 flex flex-wrap gap-2 text-xs font-medium">
+                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-emerald-700">CSV import/export</span>
+                  <span className="rounded-full border border-sky-200 bg-sky-50 px-2 py-1 text-sky-700">Category correction</span>
+                  <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-amber-700">Budgets & learned rules</span>
+                  <span className="rounded-full border border-violet-200 bg-violet-50 px-2 py-1 text-violet-700">Tauri desktop core</span>
+                </div>
+                <CardTitle className="text-xl">Recruiter-friendly demo entry</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm leading-relaxed text-slate-700">
+                  This web version simulates the product flow with persistent browser data so you can test the UX immediately.
+                  The full product is a Tauri desktop app with native file dialogs and local processing.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <div className="text-xs uppercase tracking-wide text-slate-500">Mode</div>
+                    <div className="mt-1 text-sm font-semibold">Web Demo + Desktop App</div>
+                  </div>
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <div className="text-xs uppercase tracking-wide text-slate-500">State</div>
+                    <div className="mt-1 text-sm font-semibold">Saved in browser</div>
+                  </div>
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <div className="text-xs uppercase tracking-wide text-slate-500">Best test</div>
+                    <div className="mt-1 text-sm font-semibold">Import a sample CSV</div>
+                  </div>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-white p-4">
+                  <div className="mb-2 text-sm font-semibold text-slate-900">What to try in 60 seconds</div>
+                  <ol className="list-decimal space-y-1 pl-5 text-sm text-slate-700">
+                    <li>Open the interactive demo.</li>
+                    <li>Import a CSV (or use seeded demo data already loaded).</li>
+                    <li>Edit a category and verify it appears in Learned Rules.</li>
+                    <li>Adjust a budget and export filtered CSV.</li>
+                  </ol>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" onClick={() => { window.location.hash = "/demo"; }}>
+                    Open Interactive Demo
+                  </Button>
+                  <a
+                    href="https://github.com/Humanji7/ledgr"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-slate-900 hover:bg-slate-50"
+                  >
+                    View Source
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-6">
+              <Card className="border-slate-900 bg-slate-900 text-white shadow-lg shadow-slate-300/40">
+                <CardHeader>
+                  <CardTitle className="text-white">Why this project matters</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm text-slate-200">
+                  <p>
+                    Ledgr is a real product workflow, not a static mockup: import, classify, review, budget, and export.
+                  </p>
+                  <p>
+                    The browser demo is intentionally built to feel like production behavior so non-technical reviewers can validate the UX by link.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notes for testing</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm text-slate-700">
+                  <p>
+                    Web demo stores changes in <code>localStorage</code>. Refresh to verify persistence.
+                  </p>
+                  <p>
+                    Desktop-only features remain in the Tauri build (native dialogs and local runtime integrations).
+                  </p>
+                  <p>
+                    Direct demo link: <code>#/demo</code>
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (modelReady === null || wizardDone === null) {
     return (
@@ -360,6 +533,19 @@ export default function App() {
         {lang === "ru" ? "К содержимому" : "Skip to content"}
       </a>
       <div className="mx-auto max-w-6xl px-6 py-8">
+        <input
+          ref={webImportInputRef}
+          type="file"
+          accept=".csv,text/csv"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.currentTarget.files?.[0];
+            if (file) {
+              void doImport(file);
+            }
+            e.currentTarget.value = "";
+          }}
+        />
         <header className="mb-6 flex items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-slate-900">Ledgr</h1>
@@ -368,6 +554,11 @@ export default function App() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            {!isNativeApp ? (
+              <Button type="button" variant="ghost" onClick={() => { window.location.hash = ""; }} disabled={busy}>
+                Overview
+              </Button>
+            ) : null}
             <Button type="button" variant="outline" onClick={() => setShowSettings(true)} disabled={busy}>
               {s.settings}
             </Button>
@@ -388,6 +579,14 @@ export default function App() {
             className="mb-4 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
           >
             {toast}
+          </div>
+        ) : null}
+
+        {!isNativeApp ? (
+          <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            {lang === "ru"
+              ? "Web demo mode: данные сохраняются локально в браузере (localStorage). Импорт CSV, фильтры, бюджеты и редактирование категорий работают как интерактивное демо."
+              : "Web demo mode: data is stored locally in your browser (localStorage). CSV import, filters, budgets, and category edits work as an interactive demo."}
           </div>
         ) : null}
 

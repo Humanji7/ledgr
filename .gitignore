@@ -42,3 +42,4 @@ src-tauri/gen/schemas/
 # Sidecar binaries (llama.cpp) — too large for git
 src-tauri/binaries/
 src-tauri/resources/llama/
+.vercel
